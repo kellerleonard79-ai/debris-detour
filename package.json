@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "wrangler pages dev",
+    "db:local": "wrangler d1 execute debris-detour-db --local --file=./schema.sql",
+    "db:remote": "wrangler d1 execute debris-detour-db --remote --file=./schema.sql",
+    "seed:local": "wrangler d1 execute debris-detour-db --local --file=./seed.sql",
+    "seed:remote": "wrangler d1 execute debris-detour-db --remote --file=./seed.sql"
   },
   "repository": {
     "type": "git",
@@ -13,7 +18,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/kellerleonard79-ai/debris-detour/issues"
   },
