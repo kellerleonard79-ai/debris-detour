@@ -20,8 +20,5 @@
   "homepage": "https://github.com/kellerleonard79-ai/debris-detour#readme",
   "devDependencies": {
     "wrangler": "^4.151.1"
-  },
-  "dependencies": {
-    "@turf/turf": "^7.4.0"
   }
 }

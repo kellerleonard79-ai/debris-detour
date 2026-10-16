@@ -1,0 +1,8 @@
+name = "debris-detour"
+compatibility_date = "2026-10-16"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "debris-detour-db"
+database_id = "e7f82f01-0662-4e63-84f8-8e988c3fed35"
