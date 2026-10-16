@@ -9,7 +9,9 @@
     "db:local": "wrangler d1 execute debris-detour-db --local --file=./schema.sql",
     "db:remote": "wrangler d1 execute debris-detour-db --remote --file=./schema.sql",
     "seed:local": "wrangler d1 execute debris-detour-db --local --file=./seed.sql",
-    "seed:remote": "wrangler d1 execute debris-detour-db --remote --file=./seed.sql"
+    "seed:remote": "wrangler d1 execute debris-detour-db --remote --file=./seed.sql",
+    "testdata": "wrangler d1 execute debris-detour-db --local --file=./test-data.sql",
+    "db:reset": "npm run db:local && npm run testdata"
   },
   "repository": {
     "type": "git",
