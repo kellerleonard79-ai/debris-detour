@@ -2,7 +2,7 @@
 import { map } from './map.js';
 import { createReport } from './api.js';
 import { loadReports } from './map.js';
-import { TYPES, NOTE_MAX } from '../../../lib/rules.js';
+import { TYPES, NOTE_MAX } from './constants.js';
 
 let reportMarker = null;
 

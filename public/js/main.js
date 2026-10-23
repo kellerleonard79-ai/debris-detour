@@ -1,6 +1,6 @@
 // public/js/main.js
 import { initMap, loadReports } from './map.js';
-import { initReportSheet } from './report.js';
+import { openReportSheet } from './report.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Debris Detour initializing...');
@@ -13,6 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReports(map);
   }
 
-  // 3. Initialize the reporting bottom sheet
-  initReportSheet();
+  // 3. Open the reporting bottom sheet when Report is tapped
+  document.getElementById('report-btn')?.addEventListener('click', openReportSheet);
 });
