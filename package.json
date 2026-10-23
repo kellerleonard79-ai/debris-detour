@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "wrangler pages dev",
+    "dev": "wrangler pages dev public",
     "db:local": "wrangler d1 execute debris-detour-db --local --file=./schema.sql",
     "db:remote": "wrangler d1 execute debris-detour-db --remote --file=./schema.sql",
     "seed:local": "wrangler d1 execute debris-detour-db --local --file=./seed.sql",

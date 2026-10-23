@@ -1,10 +1,88 @@
-body {
+html, body {
   margin: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+/* Map fills the entire background */
 #map {
-  height: 200px;
-    flex: 1;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Gray bar across the top with title pushed to the right */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(40, 40, 40, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+  z-index: 1010;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.brand-title {
+  color: white;
+  font-weight: bold;
+  font-size: 40px;
+  letter-spacing: 0.5px;
+  margin-right: 1010px;
+}
+
+/* Big Red Report Button fixed at bottom center */
+#report-btn {
+  position: fixed;
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 56px;
+  background: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 28px;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 6px 16px rgba(255, 59, 48, 0.4);
+  cursor: pointer;
+}
+
+#report-btn:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+/* Bottom Sheet Styling (hidden by default until opened) */
+#sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  z-index: 2000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#sheet.open {
+  transform: translateY(0);
 }
