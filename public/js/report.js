@@ -137,7 +137,7 @@ export function openReportSheet() {
       type: selectedType,
       passable: selectedPassable,
       note: note.trim() || null,
-      otherText: selectedType === 'other' ? otherText.trim() : null
+      other_text: selectedType === 'other' ? otherText.trim() : null
     };
 
     try {
