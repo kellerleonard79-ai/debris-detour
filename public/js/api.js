@@ -29,3 +29,20 @@ export async function createReport(data) {
   }
   return json;
 }
+
+export async function geocode(q, lat, lng) {
+  const params = new URLSearchParams({ q, lat, lng });
+  const res = await fetch(`/api/geocode?${params}`);
+  if (!res.ok) throw new Error('Search failed');
+  return await res.json();
+}
+
+export async function getRoute(start, end) {
+  const res = await fetch('/api/route', {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ start, end })
+  });
+  if (!res.ok) throw new Error('No route found');
+  return await res.json();
+}
