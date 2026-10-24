@@ -6,12 +6,16 @@ const reportLayer = L.layerGroup();
 const LETTERS = { tree: 'T', flood: 'F', power_line: 'P', debris: 'D', other: '?' };
 
 export function initMap() {
-  map = L.map('map', { zoomControl: false }).setView([33.2443, -86.8164], 13);
+  map = L.map('map', { zoomControl: false }).setView([30.4213, -87.2169], 12); // Pensacola
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap &copy; CARTO'
   }).addTo(map);
+
+  // Zoom to the user if they allow location; otherwise stay on Pensacola.
+  map.locate({ setView: true, maxZoom: 16 });
+  map.on('locationfound', e => L.circleMarker(e.latlng, { radius: 8, fillOpacity: 1 }).addTo(map));
 
   reportLayer.addTo(map);
   map.on('moveend', loadReports);
