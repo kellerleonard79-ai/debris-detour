@@ -4,6 +4,7 @@ import { geocode, getRoute } from './api.js';
 
 const search = document.getElementById('search');
 const results = document.getElementById('results');
+const card = document.getElementById('route-card');
 let timer;
 let routeLine;
 
@@ -46,6 +47,10 @@ async function drawRoute(start, end) {
     if (routeLine) routeLine.remove();
     routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
     map.fitBounds(routeLine.getBounds());
+
+    const minutes = Math.round(route.summary.duration / 60);
+    const miles = (route.summary.distance / 1609.34).toFixed(1);
+    card.textContent = `${minutes} min · ${miles} mi`;
   } catch (err) {
     console.error(err);
   }

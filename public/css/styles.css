@@ -128,3 +128,19 @@ html, body {
   cursor: pointer;
 }
 #results div + div { border-top: 1px solid #eee; }
+
+/* Trip time and distance */
+#route-card {
+  position: fixed;
+  bottom: 105px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 1000;
+}
+#route-card:empty { display: none; }
