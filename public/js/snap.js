@@ -51,11 +51,32 @@ export async function snapPoint(lat, lng) {
   }
 
   if (!best || best.dist > 30) return { found: false };
+
+  // Walk along the road from the pin's segment to the intersection on each side.
+  const { way, index } = best;
+  const intersections = findIntersections(roads);
+  let start = index;
+  while (start > 0 && !intersections.has(way.nodes[start])) start--;
+  let end = index + 1;
+  while (end < way.nodes.length - 1 && !intersections.has(way.nodes[end])) end++;
+
+  const name = way.tags.name || 'unnamed road';
+  const from = crossStreet(way, start, intersections);
+  const to = crossStreet(way, end, intersections);
+
   return {
     found: true,
-    way: best.way,
-    index: best.index, // which segment of the road the pin landed on
-    intersections: findIntersections(roads),
+    location_kind: 'section',
+    section_key: `${way.id}:${way.nodes[start]}:${way.nodes[end]}`,
+    geometry: turf.lineString(way.geometry.slice(start, end + 1).map(p => [p.lon, p.lat])).geometry,
+    street_label: `${name} between ${from} and ${to}`,
     snapped: { lat: best.coords[1], lng: best.coords[0] }
   };
+}
+
+// The other street at this node, or "dead end" if the road just stops here.
+function crossStreet(way, i, intersections) {
+  const names = intersections.get(way.nodes[i]);
+  if (!names) return 'dead end';
+  return names.find(n => n !== way.tags.name) || 'unnamed road';
 }
