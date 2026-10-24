@@ -8,9 +8,9 @@ const LETTERS = { tree: 'T', flood: 'F', power_line: 'P', debris: 'D', other: '?
 export function initMap() {
   map = L.map('map', { zoomControl: false }).setView([30.4213, -87.2169], 12); // Pensacola
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap &copy; CARTO'
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
   // Zoom to the user if they allow location; otherwise stay on Pensacola.
