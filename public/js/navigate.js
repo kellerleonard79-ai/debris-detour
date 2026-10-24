@@ -50,8 +50,15 @@ async function drawRoute(start, end) {
 
     const minutes = Math.round(route.summary.duration / 60);
     const miles = (route.summary.distance / 1609.34).toFixed(1);
-    card.textContent = `${minutes} min · ${miles} mi`;
+    card.innerHTML = `${minutes} min · ${miles} mi <button id="cancel-route">Cancel</button>`;
+    document.getElementById('cancel-route').addEventListener('click', cancelRoute);
   } catch (err) {
     console.error(err);
   }
+}
+
+function cancelRoute() {
+  routeLine.remove();
+  card.innerHTML = '';
+  search.value = '';
 }
