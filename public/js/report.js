@@ -78,10 +78,13 @@ export function openReportSheet() {
   }
   reportMarker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
 
+  let currentSnap = null;
+
   async function snapPin() {
     const label = document.getElementById('street-label');
     const submit = document.getElementById('submit-report');
     submit.disabled = true;
+    currentSnap = null;
     label.textContent = 'Finding street...';
     if (sectionLine) map.removeLayer(sectionLine);
     try {
@@ -93,6 +96,7 @@ export function openReportSheet() {
       }
       reportMarker.setLatLng([snap.snapped.lat, snap.snapped.lng]);
       label.textContent = snap.street_label;
+      currentSnap = snap;
       submit.disabled = false;
       sectionLine = L.geoJSON(snap.geometry, {
         style: { color: 'orange', weight: 8 },
@@ -164,6 +168,10 @@ export function openReportSheet() {
     const payload = {
       lat: markerPos.lat,
       lng: markerPos.lng,
+      location_kind: currentSnap.location_kind,
+      section_key: currentSnap.section_key,
+      geometry: JSON.stringify(currentSnap.geometry),
+      street_label: currentSnap.street_label,
       type: selectedType,
       passable: selectedPassable,
       note: note.trim() || null,
