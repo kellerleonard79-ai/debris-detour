@@ -6,6 +6,7 @@ import { TYPES, NOTE_MAX } from './constants.js';
 import { snapPoint } from './snap.js';
 
 let reportMarker = null;
+let sectionLine = null; // orange line showing the blocked section
 
 export function openReportSheet() {
   const sheet = document.getElementById('sheet');
@@ -81,6 +82,7 @@ export function openReportSheet() {
   async function snapPin() {
     const label = document.getElementById('street-label');
     label.textContent = 'Finding street...';
+    if (sectionLine) map.removeLayer(sectionLine);
     try {
       const pos = reportMarker.getLatLng();
       const snap = await snapPoint(pos.lat, pos.lng);
@@ -90,6 +92,10 @@ export function openReportSheet() {
       }
       reportMarker.setLatLng([snap.snapped.lat, snap.snapped.lng]);
       label.textContent = snap.street_label;
+      sectionLine = L.geoJSON(snap.geometry, {
+        style: { color: 'orange', weight: 8 },
+        pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color: 'orange' })
+      }).addTo(map);
     } catch (err) {
       label.textContent = 'Could not find the street. Drag the pin to try again.';
     }
@@ -181,6 +187,10 @@ function closeReportSheet() {
   if (reportMarker) {
     map.removeLayer(reportMarker);
     reportMarker = null;
+  }
+  if (sectionLine) {
+    map.removeLayer(sectionLine);
+    sectionLine = null;
   }
 }
 
