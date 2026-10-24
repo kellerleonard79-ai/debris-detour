@@ -21,7 +21,7 @@ export async function onRequestGet(context) {
 
     try {
         const { results } = await listActive(context.env.DB, west, south, east, north, now);
-        return json({ results });
+        return json(results);
     } catch (err) {
         console.error('Database error:', err);
         return error('Failed to fetch reports', 500);
