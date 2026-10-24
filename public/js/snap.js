@@ -1,4 +1,6 @@
 // public/js/snap.js
+const SNAP_METERS = 30; // how far from a road a pin can be
+const INTERSECTION_METERS = 5; // closer than this to a corner snaps to the corner
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const ROAD_TYPES = 'motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link';
 
@@ -36,7 +38,7 @@ function findIntersections(roads) {
   return intersections;
 }
 
-// Finds the closest road to the point. Returns { found: false } if none is within 30 m.
+// Finds the closest road to the point. Returns { found: false } if none is within SNAP_METERS.
 export async function snapPoint(lat, lng) {
   const roads = await getRoads(lat, lng);
   const pin = turf.point([lng, lat]);
@@ -50,11 +52,26 @@ export async function snapPoint(lat, lng) {
     }
   }
 
-  if (!best || best.dist > 30) return { found: false };
+  if (!best || best.dist > SNAP_METERS) return { found: false };
 
-  // Walk along the road from the pin's segment to the intersection on each side.
   const { way, index } = best;
   const intersections = findIntersections(roads);
+
+  // Near a corner? Report the intersection instead of a section.
+  const corner = nearestIntersection(way, pin, intersections);
+  if (corner) {
+    const names = intersections.get(corner.node).map(n => n || 'unnamed road');
+    return {
+      found: true,
+      location_kind: 'intersection',
+      section_key: 'node:' + corner.node,
+      geometry: corner.point.geometry,
+      street_label: 'Intersection of ' + names.join(' and '),
+      snapped: { lat: corner.point.geometry.coordinates[1], lng: corner.point.geometry.coordinates[0] }
+    };
+  }
+
+  // Walk along the road from the pin's segment to the intersection on each side.
   let start = index;
   while (start > 0 && !intersections.has(way.nodes[start])) start--;
   let end = index + 1;
@@ -79,4 +96,16 @@ function crossStreet(way, i, intersections) {
   const names = intersections.get(way.nodes[i]);
   if (!names) return 'dead end';
   return names.find(n => n !== way.tags.name) || 'unnamed road';
+}
+
+// The closest intersection on this road within INTERSECTION_METERS of the pin, if any.
+function nearestIntersection(way, pin, intersections) {
+  let closest = null;
+  way.nodes.forEach((node, i) => {
+    if (!intersections.has(node)) return;
+    const point = turf.point([way.geometry[i].lon, way.geometry[i].lat]);
+    const dist = turf.distance(pin, point, { units: 'meters' });
+    if (dist <= INTERSECTION_METERS && (!closest || dist < closest.dist)) closest = { node, dist, point };
+  });
+  return closest;
 }
