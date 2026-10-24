@@ -10,17 +10,16 @@ export async function onRequestGet({ request, env }) {
   url.search = new URLSearchParams({
     api_key: env.ORS_API_KEY,
     text: q,
-    'focus.point.lat': params.get('lat') || 30.4213, // bias results toward the user, else Pensacola
+    'focus.point.lat': params.get('lat') || 30.4213, // Pensacola by default
     'focus.point.lon': params.get('lng') || -87.2169
   });
 
   const res = await fetch(url);
   if (!res.ok) return error('Search failed', 502);
 
-  const data = await res.json();
-  return json(data.features.map(f => ({
-    label: f.properties.label,
-    lat: f.geometry.coordinates[1], // GeoJSON is [lng, lat]
-    lng: f.geometry.coordinates[0]
-  })));
+  const { features } = await res.json();
+  return json(features.map(f => {
+    const [lng, lat] = f.geometry.coordinates;
+    return { label: f.properties.label, lat, lng };
+  }));
 }
