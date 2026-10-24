@@ -6,7 +6,7 @@ import { TYPES, NOTE_MAX } from './constants.js';
 import { snapPoint } from './snap.js';
 
 let reportMarker = null;
-let sectionLine = null; // orange line showing the blocked section
+let sectionLine = null;
 
 export function openReportSheet() {
   const sheet = document.getElementById('sheet');
@@ -78,20 +78,22 @@ export function openReportSheet() {
   }
   reportMarker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
 
-  // Snap the pin to the nearest road and show its name.
   async function snapPin() {
     const label = document.getElementById('street-label');
+    const submit = document.getElementById('submit-report');
+    submit.disabled = true;
     label.textContent = 'Finding street...';
     if (sectionLine) map.removeLayer(sectionLine);
     try {
-      const pos = reportMarker.getLatLng();
-      const snap = await snapPoint(pos.lat, pos.lng);
+      const { lat, lng } = reportMarker.getLatLng();
+      const snap = await snapPoint(lat, lng);
       if (!snap.found) {
         label.textContent = 'Move the pin onto a road';
         return;
       }
       reportMarker.setLatLng([snap.snapped.lat, snap.snapped.lng]);
       label.textContent = snap.street_label;
+      submit.disabled = false;
       sectionLine = L.geoJSON(snap.geometry, {
         style: { color: 'orange', weight: 8 },
         pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color: 'orange' })

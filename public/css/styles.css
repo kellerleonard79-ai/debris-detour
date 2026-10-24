@@ -155,3 +155,5 @@ html, body {
   font-weight: bold;
   cursor: pointer;
 }
+
+#submit-report:disabled { opacity: 0.4; }
