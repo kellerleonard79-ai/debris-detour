@@ -3,6 +3,7 @@ import { map } from './map.js';
 import { createReport } from './api.js';
 import { loadReports } from './map.js';
 import { TYPES, NOTE_MAX } from './constants.js';
+import { snapPoint } from './snap.js';
 
 let reportMarker = null;
 
@@ -22,6 +23,7 @@ export function openReportSheet() {
       </div>
 
       <p style="font-size: 14px; color: #666; margin-top: 0;">Drag the pin on the map to the exact location.</p>
+      <p id="street-label" style="font-weight: bold; margin: 0 0 16px;"></p>
 
       <!-- Hazard Type Selection -->
       <label style="font-weight: bold; display: block; margin-bottom: 8px;">Hazard Type</label>
@@ -74,6 +76,26 @@ export function openReportSheet() {
     map.removeLayer(reportMarker);
   }
   reportMarker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
+
+  // Snap the pin to the nearest road and show its name.
+  async function snapPin() {
+    const label = document.getElementById('street-label');
+    label.textContent = 'Finding street...';
+    try {
+      const pos = reportMarker.getLatLng();
+      const snap = await snapPoint(pos.lat, pos.lng);
+      if (!snap.found) {
+        label.textContent = 'Move the pin onto a road';
+        return;
+      }
+      reportMarker.setLatLng([snap.snapped.lat, snap.snapped.lng]);
+      label.textContent = snap.street_label;
+    } catch (err) {
+      label.textContent = 'Could not find the street. Drag the pin to try again.';
+    }
+  }
+  reportMarker.on('dragend', snapPin);
+  snapPin();
 
   // State management inside the form
   let selectedType = null;
