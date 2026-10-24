@@ -1,10 +1,11 @@
 // public/js/navigate.js
 import { map } from './map.js';
-import { geocode } from './api.js';
+import { geocode, getRoute } from './api.js';
 
 const search = document.getElementById('search');
 const results = document.getElementById('results');
 let timer;
+let routeLine;
 
 export function initSearch() {
   search.addEventListener('input', () => {
@@ -32,5 +33,20 @@ async function showResults() {
 function pickPlace(place) {
   search.value = place.label;
   results.innerHTML = '';
-  // The route is drawn here in the next step.
+
+  navigator.geolocation.getCurrentPosition(
+    pos => drawRoute({ lat: pos.coords.latitude, lng: pos.coords.longitude }, place),
+    () => drawRoute(map.getCenter(), place)
+  );
+}
+
+async function drawRoute(start, end) {
+  try {
+    const route = await getRoute(start, end);
+    if (routeLine) routeLine.remove();
+    routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
+    map.fitBounds(routeLine.getBounds());
+  } catch (err) {
+    console.error(err);
+  }
 }
