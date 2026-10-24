@@ -41,7 +41,21 @@ export async function onRequestPost(context) {
         return error('Invalid JSON', 400);
     }
 
-    const { lat, lng, type, passable, note, other_text } = body;
+    const { lat, lng, location_kind, section_key, geometry, street_label, type, passable, note, other_text } = body;
+
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+        return error('Missing location', 400);
+    }
+
+    if (!['section', 'intersection'].includes(location_kind) || !section_key || !street_label) {
+        return error('Missing street section', 400);
+    }
+
+    try {
+        JSON.parse(geometry);
+    } catch (e) {
+        return error('Invalid geometry', 400);
+    }
 
     if (!TYPES.includes(type)) {
         return error('Invalid report type', 400);
@@ -66,12 +80,12 @@ export async function onRequestPost(context) {
     const report = {
         id,
         deviceId,
-        lat: lat || 30.4213,
-        lng: lng || -87.2169,
-        locationKind: 'section',
-        sectionKey: 'raw:' + id,
-        geometry: JSON.stringify({ type: 'Point', coordinates: [lng || -87.2169, lat || 30.4213] }),
-        streetLabel: 'Unknown street',
+        lat,
+        lng,
+        locationKind: location_kind,
+        sectionKey: section_key,
+        geometry,
+        streetLabel: street_label,
         roadClass: 'residential',
         type,
         otherText: other_text || null,
