@@ -9,7 +9,7 @@ function headers() {
 }
 
 export async function getReports(bboxString) {
-  const res = await fetch(`/api/reports?bbox=${encodeURIComponent(bboxString)}`);
+  const res = await fetch(`/api/reports?bbox=${encodeURIComponent(bboxString)}`, { headers: headers() });
   if (!res.ok) {
     throw new Error('Failed to fetch reports');
   }
@@ -45,4 +45,15 @@ export async function getRoute(start, end, zones) {
   });
   if (!res.ok) throw new Error('No route found');
   return await res.json();
+}
+
+export async function sendVote(reportId, vote) {
+  const res = await fetch(`/api/reports/${reportId}/vote`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ vote })
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error);
+  return json;
 }

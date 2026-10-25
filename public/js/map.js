@@ -1,5 +1,6 @@
 // public/js/map.js
 import { getReports } from './api.js';
+import { openDetailSheet } from './detail.js';
 
 export let map;
 const reportLayer = L.layerGroup();
@@ -38,7 +39,7 @@ export async function loadReports() {
         style: { color, weight: 8 },
         pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color })
       }).addTo(reportLayer);
-      L.marker([r.lat, r.lng], { icon }).addTo(reportLayer);
+      L.marker([r.lat, r.lng], { icon }).on('click', () => openDetailSheet(r)).addTo(reportLayer);
     }
   } catch (err) {
     console.error('Could not refresh reports:', err); // keep the old markers

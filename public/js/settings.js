@@ -27,7 +27,7 @@ export function initSettings() {
 function openSettings() {
   const settings = getSettings();
   const sheet = document.getElementById('sheet');
-  sheet.innerHTML = `<div class="settings">
+  sheet.innerHTML = `<div class="panel">
     <h2>Settings <button id="close-settings">✕</button></h2>
     <h3>Avoid these types</h3>
     ${TYPES.map(t => `<label><input type="checkbox" data-type="${t}" ${settings.types[t] ? 'checked' : ''}> ${t.replace('_', ' ')}</label>`).join('')}

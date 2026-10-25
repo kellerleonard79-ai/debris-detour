@@ -16,12 +16,13 @@ export async function onRequestGet(context) {
         return error('bad bbox');
     }
 
+    const deviceId = context.request.headers.get('X-Device-Id') || '';
     const [west, south, east, north] = parts;
     const now = Math.floor(Date.now() / 1000);
 
     try {
-        const { results } = await listActive(context.env.DB, west, south, east, north, now);
-        return json(results);
+        const { results } = await listActive(context.env.DB, deviceId, west, south, east, north, now);
+        return json(results.map(({ device_id, ...report }) => report));
     } catch (err) {
         console.error('Database error:', err);
         return error('Failed to fetch reports', 500);
