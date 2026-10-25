@@ -9,6 +9,8 @@ const results = document.getElementById('results');
 const card = document.getElementById('route-card');
 let timer;
 let routeLine;
+let watchId;
+let carMarker;
 
 export function initSearch() {
   search.addEventListener('input', () => {
@@ -61,7 +63,8 @@ async function drawRoute(start, end) {
 
     const minutes = Math.round(route.summary.duration / 60);
     const miles = (route.summary.distance / 1609.34).toFixed(1);
-    card.innerHTML = `${minutes} min · ${miles} mi · Avoiding ${zones.length} ${zones.length === 1 ? 'obstruction' : 'obstructions'} <button id="cancel-route">Cancel</button>`;
+    card.innerHTML = `${minutes} min · ${miles} mi · Avoiding ${zones.length} ${zones.length === 1 ? 'obstruction' : 'obstructions'} <button id="start-nav">Start</button> <button id="cancel-route">Cancel</button>`;
+    document.getElementById('start-nav').addEventListener('click', startNavigation);
     document.getElementById('cancel-route').addEventListener('click', cancelRoute);
   } catch (err) {
     console.error(err);
@@ -72,4 +75,23 @@ function cancelRoute() {
   routeLine.remove();
   card.innerHTML = '';
   search.value = '';
+}
+
+function startNavigation() {
+  card.innerHTML = 'Navigating <button id="end-nav">End</button>';
+  document.getElementById('end-nav').addEventListener('click', endNavigation);
+
+  watchId = navigator.geolocation.watchPosition(pos => {
+    const spot = [pos.coords.latitude, pos.coords.longitude];
+    if (!carMarker) carMarker = L.circleMarker(spot, { radius: 10, color: '#1976d2', fillOpacity: 1 }).addTo(map);
+    carMarker.setLatLng(spot);
+    map.setView(spot, 17);
+  }, console.error, { enableHighAccuracy: true });
+}
+
+function endNavigation() {
+  navigator.geolocation.clearWatch(watchId);
+  if (carMarker) carMarker.remove();
+  carMarker = null;
+  cancelRoute();
 }
