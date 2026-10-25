@@ -11,6 +11,10 @@ let timer;
 let routeLine;
 let watchId;
 let carMarker;
+let checkTimer;
+let destination;
+let spot;
+let routeGeometry;
 
 export function initSearch() {
   search.addEventListener('input', () => {
@@ -45,20 +49,30 @@ function pickPlace(place) {
   );
 }
 
+async function loadZones(start, end) {
+  const pad = 0.03;
+  const bbox = [
+    Math.min(start.lng, end.lng) - pad,
+    Math.min(start.lat, end.lat) - pad,
+    Math.max(start.lng, end.lng) + pad,
+    Math.max(start.lat, end.lat) + pad
+  ].join(',');
+  const reports = await getReports(bbox);
+  return buildZones(reports, getSettings());
+}
+
+function showRoute(route) {
+  if (routeLine) routeLine.remove();
+  routeGeometry = route.geometry;
+  routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
+}
+
 async function drawRoute(start, end) {
   try {
-    const pad = 0.03;
-    const bbox = [
-      Math.min(start.lng, end.lng) - pad,
-      Math.min(start.lat, end.lat) - pad,
-      Math.max(start.lng, end.lng) + pad,
-      Math.max(start.lat, end.lat) + pad
-    ].join(',');
-    const reports = await getReports(bbox);
-    const zones = buildZones(reports, getSettings());
+    destination = end;
+    const zones = await loadZones(start, end);
     const route = await getRoute(start, end, zones);
-    if (routeLine) routeLine.remove();
-    routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
+    showRoute(route);
     map.fitBounds(routeLine.getBounds());
 
     const minutes = Math.round(route.summary.duration / 60);
@@ -78,19 +92,40 @@ function cancelRoute() {
 }
 
 function startNavigation() {
-  card.innerHTML = 'Navigating <button id="end-nav">End</button>';
+  card.innerHTML = '<span id="nav-status">Navigating</span> <button id="end-nav">End</button>';
   document.getElementById('end-nav').addEventListener('click', endNavigation);
 
   watchId = navigator.geolocation.watchPosition(pos => {
-    const spot = [pos.coords.latitude, pos.coords.longitude];
+    spot = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     if (!carMarker) carMarker = L.circleMarker(spot, { radius: 10, color: '#1976d2', fillOpacity: 1 }).addTo(map);
     carMarker.setLatLng(spot);
     map.setView(spot, 17);
   }, console.error, { enableHighAccuracy: true });
+
+  checkTimer = setInterval(checkForObstructions, 30000);
+}
+
+async function checkForObstructions() {
+  if (!spot) return;
+  try {
+    const zones = await loadZones(spot, destination);
+    const end = routeGeometry.coordinates[routeGeometry.coordinates.length - 1];
+    const ahead = turf.lineSlice([spot.lng, spot.lat], end, turf.lineString(routeGeometry.coordinates));
+    if (!zones.some(zone => turf.booleanIntersects(zone, ahead))) return;
+
+    const status = document.getElementById('nav-status');
+    status.textContent = 'New obstruction ahead. Rerouting';
+    showRoute(await getRoute(spot, destination, zones));
+    status.textContent = 'Navigating';
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function endNavigation() {
   navigator.geolocation.clearWatch(watchId);
+  clearInterval(checkTimer);
+  spot = null;
   if (carMarker) carMarker.remove();
   carMarker = null;
   cancelRoute();
