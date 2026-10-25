@@ -37,11 +37,11 @@ export async function geocode(q, lat, lng) {
   return await res.json();
 }
 
-export async function getRoute(start, end) {
+export async function getRoute(start, end, zones) {
   const res = await fetch('/api/route', {
     method: 'POST',
     headers: headers(),
-    body: JSON.stringify({ start, end })
+    body: JSON.stringify({ start, end, zones })
   });
   if (!res.ok) throw new Error('No route found');
   return await res.json();

@@ -1,6 +1,7 @@
 // public/js/navigate.js
 import { map } from './map.js';
-import { geocode, getRoute } from './api.js';
+import { geocode, getRoute, getReports } from './api.js';
+import { buildZones, DEFAULT_SETTINGS } from './avoid.js';
 
 const search = document.getElementById('search');
 const results = document.getElementById('results');
@@ -43,14 +44,23 @@ function pickPlace(place) {
 
 async function drawRoute(start, end) {
   try {
-    const route = await getRoute(start, end);
+    const pad = 0.03;
+    const bbox = [
+      Math.min(start.lng, end.lng) - pad,
+      Math.min(start.lat, end.lat) - pad,
+      Math.max(start.lng, end.lng) + pad,
+      Math.max(start.lat, end.lat) + pad
+    ].join(',');
+    const reports = await getReports(bbox);
+    const zones = buildZones(reports, DEFAULT_SETTINGS);
+    const route = await getRoute(start, end, zones);
     if (routeLine) routeLine.remove();
     routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
     map.fitBounds(routeLine.getBounds());
 
     const minutes = Math.round(route.summary.duration / 60);
     const miles = (route.summary.distance / 1609.34).toFixed(1);
-    card.innerHTML = `${minutes} min · ${miles} mi <button id="cancel-route">Cancel</button>`;
+    card.innerHTML = `${minutes} min · ${miles} mi · Avoiding ${zones.length} obstructions <button id="cancel-route">Cancel</button>`;
     document.getElementById('cancel-route').addEventListener('click', cancelRoute);
   } catch (err) {
     console.error(err);
