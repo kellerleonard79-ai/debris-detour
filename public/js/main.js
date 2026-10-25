@@ -2,8 +2,10 @@
 import { initMap, loadReports } from './map.js';
 import { openReportSheet } from './report.js';
 import { initSearch } from './navigate.js';
+import { initSettings } from './settings.js';
 
 initMap();
 loadReports();
 initSearch();
+initSettings();
 document.getElementById('report-btn').addEventListener('click', openReportSheet);

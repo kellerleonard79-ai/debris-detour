@@ -157,3 +157,23 @@ html, body {
 }
 
 #submit-report:disabled { opacity: 0.4; }
+
+#settings-btn {
+  position: fixed;
+  bottom: 35px;
+  left: 20px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  font-size: 28px;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+#sheet .settings h2 { display: flex; justify-content: space-between; margin: 0 0 8px; font-size: 20px; }
+#sheet .settings h2 button { background: none; border: none; font-size: 20px; cursor: pointer; }
+#sheet .settings h3 { margin: 16px 0 4px; font-size: 16px; }
+#sheet .settings label { display: block; padding: 10px 0; font-size: 18px; text-transform: capitalize; }
+#sheet .settings input[type=checkbox] { width: 22px; height: 22px; margin-right: 10px; vertical-align: middle; }

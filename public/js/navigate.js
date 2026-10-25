@@ -1,7 +1,8 @@
 // public/js/navigate.js
 import { map } from './map.js';
 import { geocode, getRoute, getReports } from './api.js';
-import { buildZones, DEFAULT_SETTINGS } from './avoid.js';
+import { buildZones } from './avoid.js';
+import { getSettings } from './settings.js';
 
 const search = document.getElementById('search');
 const results = document.getElementById('results');
@@ -52,7 +53,7 @@ async function drawRoute(start, end) {
       Math.max(start.lat, end.lat) + pad
     ].join(',');
     const reports = await getReports(bbox);
-    const zones = buildZones(reports, DEFAULT_SETTINGS);
+    const zones = buildZones(reports, getSettings());
     const route = await getRoute(start, end, zones);
     if (routeLine) routeLine.remove();
     routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
