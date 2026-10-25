@@ -15,6 +15,7 @@ let checkTimer;
 let destination;
 let spot;
 let routeGeometry;
+let lastReroute = 0;
 
 export function initSearch() {
   search.addEventListener('input', () => {
@@ -100,6 +101,11 @@ function startNavigation() {
     if (!carMarker) carMarker = L.circleMarker(spot, { radius: 10, color: '#1976d2', fillOpacity: 1 }).addTo(map);
     carMarker.setLatLng(spot);
     map.setView(spot, 17);
+
+    const line = turf.lineString(routeGeometry.coordinates);
+    if (turf.pointToLineDistance([spot.lng, spot.lat], line, { units: 'meters' }) > 50) {
+      reroute('Off route. Rerouting');
+    }
   }, console.error, { enableHighAccuracy: true });
 
   checkTimer = setInterval(checkForObstructions, 30000);
@@ -113,13 +119,25 @@ async function checkForObstructions() {
     const ahead = turf.lineSlice([spot.lng, spot.lat], end, turf.lineString(routeGeometry.coordinates));
     if (!zones.some(zone => turf.booleanIntersects(zone, ahead))) return;
 
-    const status = document.getElementById('nav-status');
-    status.textContent = 'New obstruction ahead. Rerouting';
-    showRoute(await getRoute(spot, destination, zones));
-    status.textContent = 'Navigating';
+    reroute('New obstruction ahead. Rerouting');
   } catch (err) {
     console.error(err);
   }
+}
+
+async function reroute(message) {
+  if (Date.now() - lastReroute < 15000) return;
+  lastReroute = Date.now();
+
+  const status = document.getElementById('nav-status');
+  status.textContent = message;
+  try {
+    const zones = await loadZones(spot, destination);
+    showRoute(await getRoute(spot, destination, zones));
+  } catch (err) {
+    console.error(err);
+  }
+  status.textContent = 'Navigating';
 }
 
 function endNavigation() {
