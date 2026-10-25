@@ -13,7 +13,6 @@ export function initMap() {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // Zoom to the user if they allow location; otherwise stay on Pensacola.
   map.locate({ setView: true, maxZoom: 16 });
   map.on('locationfound', e => L.circleMarker(e.latlng, { radius: 8, fillOpacity: 1 }).addTo(map));
 
@@ -34,6 +33,11 @@ export async function loadReports() {
         html: LETTERS[r.type],
         iconSize: [32, 32]
       });
+      const color = r.passable ? '#f9a825' : '#d32f2f';
+      L.geoJSON(JSON.parse(r.geometry), {
+        style: { color, weight: 8 },
+        pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color })
+      }).addTo(reportLayer);
       L.marker([r.lat, r.lng], { icon }).addTo(reportLayer);
     }
   } catch (err) {
