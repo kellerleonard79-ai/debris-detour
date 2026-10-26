@@ -1,26 +1,42 @@
-// public/js/snap.js
-const SNAP_METERS = 30; // how far from a road a pin can be
-const INTERSECTION_METERS = 5; // closer than this to a corner snaps to the corner
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const SNAP_METERS = 30;
+const INTERSECTION_METERS = 5;
+const OVERPASS_URLS = [
+  'https://overpass.openstreetmap.fr/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+const OVERPASS_TIMEOUT_MS = 15000;
 const ROAD_TYPES = 'motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link';
 
-// All roads within 300 m of the point, each with its node IDs and shape.
+async function askOverpass(url, query, signal) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'data=' + encodeURIComponent(query),
+    signal
+  });
+  if (!res.ok) throw new Error('Overpass failed');
+  const data = await res.json();
+  if (data.remark) throw new Error('Overpass failed');
+  return data.elements;
+}
+
 async function getRoads(lat, lng) {
-  const query = `[out:json][timeout:25];
+  const query = `[out:json][timeout:15];
     way(around:300,${lat},${lng})["highway"~"^(${ROAD_TYPES})$"];
     out body geom;`;
 
-  const res = await fetch(OVERPASS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'data=' + encodeURIComponent(query)
-  });
-  if (!res.ok) throw new Error('Overpass failed');
-  return (await res.json()).elements;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
+  try {
+    const roads = await Promise.any(OVERPASS_URLS.map(url => askOverpass(url, query, controller.signal)));
+    return roads.filter(way => way.geometry.every(Boolean));
+  } finally {
+    clearTimeout(timer);
+    controller.abort();
+  }
 }
 
-// Nodes where roads cross: map of node ID -> names of the roads there.
-// Two roads with the same name meeting at a node is just OSM splitting one street, so it doesn't count.
 function findIntersections(roads) {
   const waysAtNode = new Map();
   for (const way of roads) {
@@ -38,7 +54,6 @@ function findIntersections(roads) {
   return intersections;
 }
 
-// Finds the closest road to the point. Returns { found: false } if none is within SNAP_METERS.
 export async function snapPoint(lat, lng) {
   const roads = await getRoads(lat, lng);
   const pin = turf.point([lng, lat]);
@@ -57,7 +72,6 @@ export async function snapPoint(lat, lng) {
   const { way, index } = best;
   const intersections = findIntersections(roads);
 
-  // Near a corner? Report the intersection instead of a section.
   const corner = nearestIntersection(way, pin, intersections);
   if (corner) {
     const names = intersections.get(corner.node).map(n => n || 'unnamed road');
@@ -71,7 +85,6 @@ export async function snapPoint(lat, lng) {
     };
   }
 
-  // Walk along the road from the pin's segment to the intersection on each side.
   let start = index;
   while (start > 0 && !intersections.has(way.nodes[start])) start--;
   let end = index + 1;
@@ -91,14 +104,12 @@ export async function snapPoint(lat, lng) {
   };
 }
 
-// The other street at this node, or "dead end" if the road just stops here.
 function crossStreet(way, i, intersections) {
   const names = intersections.get(way.nodes[i]);
   if (!names) return 'dead end';
   return names.find(n => n !== way.tags.name) || 'unnamed road';
 }
 
-// The closest intersection on this road within INTERSECTION_METERS of the pin, if any.
 function nearestIntersection(way, pin, intersections) {
   let closest = null;
   way.nodes.forEach((node, i) => {
