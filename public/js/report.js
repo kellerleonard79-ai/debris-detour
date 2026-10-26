@@ -7,15 +7,82 @@ import { snapPoint } from './snap.js';
 
 let reportMarker = null;
 let sectionLine = null;
+let currentSnap = null;
 
 export function openReportSheet() {
   const sheet = document.getElementById('sheet');
   if (!sheet) return;
 
-  // Center pin location on map center or user position
   const center = map.getCenter();
 
-  // Populate sheet HTML
+  if (reportMarker) {
+    map.removeLayer(reportMarker);
+  }
+  reportMarker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
+  reportMarker.on('dragend', snapPin);
+
+  currentSnap = null;
+  showLocationStep();
+  snapPin();
+}
+
+function showLocationStep() {
+  const sheet = document.getElementById('sheet');
+  reportMarker.dragging.enable();
+
+  sheet.innerHTML = `
+    <div style="font-family: sans-serif; padding-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h2 style="margin: 0; font-size: 20px;">Report Obstruction</h2>
+        <button id="close-sheet" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 14px; color: #666; margin: 0 0 8px;">Drag the pin on the map to the exact location.</p>
+      <p id="street-label" style="font-weight: bold; margin: 0 0 12px;"></p>
+      <button id="confirm-location" disabled style="width: 100%; height: 52px; background: #007aff; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;">Confirm location</button>
+    </div>
+  `;
+  sheet.classList.add('open');
+
+  document.getElementById('close-sheet').addEventListener('click', closeReportSheet);
+  document.getElementById('confirm-location').addEventListener('click', showForm);
+
+  if (currentSnap) {
+    document.getElementById('street-label').textContent = currentSnap.street_label;
+    document.getElementById('confirm-location').disabled = false;
+  }
+}
+
+async function snapPin() {
+  const label = document.getElementById('street-label');
+  const confirm = document.getElementById('confirm-location');
+  confirm.disabled = true;
+  currentSnap = null;
+  label.textContent = 'Finding street...';
+  if (sectionLine) map.removeLayer(sectionLine);
+  try {
+    const { lat, lng } = reportMarker.getLatLng();
+    const snap = await snapPoint(lat, lng);
+    if (!snap.found) {
+      label.textContent = 'Move the pin onto a road';
+      return;
+    }
+    reportMarker.setLatLng([snap.snapped.lat, snap.snapped.lng]);
+    label.textContent = snap.street_label;
+    currentSnap = snap;
+    confirm.disabled = false;
+    sectionLine = L.geoJSON(snap.geometry, {
+      style: { color: 'orange', weight: 8 },
+      pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color: 'orange' })
+    }).addTo(map);
+  } catch (err) {
+    label.textContent = 'Could not find the street. Drag the pin to try again.';
+  }
+}
+
+function showForm() {
+  const sheet = document.getElementById('sheet');
+  reportMarker.dragging.disable();
+
   sheet.innerHTML = `
     <div style="font-family: sans-serif; padding-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -23,8 +90,8 @@ export function openReportSheet() {
         <button id="close-sheet" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
       </div>
 
-      <p style="font-size: 14px; color: #666; margin-top: 0;">Drag the pin on the map to the exact location.</p>
-      <p id="street-label" style="font-weight: bold; margin: 0 0 16px;"></p>
+      <p id="street-label" style="font-weight: bold; margin: 0 0 4px;"></p>
+      <button type="button" id="change-location" style="background: none; border: none; color: #007aff; font-size: 14px; padding: 0; margin-bottom: 16px; cursor: pointer;">Change location</button>
 
       <!-- Hazard Type Selection -->
       <label style="font-weight: bold; display: block; margin-bottom: 8px;">Hazard Type</label>
@@ -70,44 +137,8 @@ export function openReportSheet() {
     </div>
   `;
 
-  sheet.classList.add('open');
-
-  // Place draggable marker at map center
-  if (reportMarker) {
-    map.removeLayer(reportMarker);
-  }
-  reportMarker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
-
-  let currentSnap = null;
-
-  async function snapPin() {
-    const label = document.getElementById('street-label');
-    const submit = document.getElementById('submit-report');
-    submit.disabled = true;
-    currentSnap = null;
-    label.textContent = 'Finding street...';
-    if (sectionLine) map.removeLayer(sectionLine);
-    try {
-      const { lat, lng } = reportMarker.getLatLng();
-      const snap = await snapPoint(lat, lng);
-      if (!snap.found) {
-        label.textContent = 'Move the pin onto a road';
-        return;
-      }
-      reportMarker.setLatLng([snap.snapped.lat, snap.snapped.lng]);
-      label.textContent = snap.street_label;
-      currentSnap = snap;
-      submit.disabled = false;
-      sectionLine = L.geoJSON(snap.geometry, {
-        style: { color: 'orange', weight: 8 },
-        pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color: 'orange' })
-      }).addTo(map);
-    } catch (err) {
-      label.textContent = 'Could not find the street. Drag the pin to try again.';
-    }
-  }
-  reportMarker.on('dragend', snapPin);
-  snapPin();
+  document.getElementById('street-label').textContent = currentSnap.street_label;
+  document.getElementById('change-location').addEventListener('click', showLocationStep);
 
   // State management inside the form
   let selectedType = null;
