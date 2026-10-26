@@ -4,6 +4,7 @@ import { createReport } from './api.js';
 import { loadReports } from './map.js';
 import { TYPES, NOTE_MAX, COLORS } from './constants.js';
 import { snapPoint } from './snap.js';
+import { shrinkPhoto } from './photo.js';
 
 const pinIcon = L.divIcon({
   className: '',
@@ -137,6 +138,9 @@ function showForm() {
       <label style="font-weight: bold; display: block; margin-bottom: 4px;">Notes (Optional)</label>
       <textarea id="report-note" maxlength="${NOTE_MAX}" placeholder="Add any helpful details..." style="width: 100%; height: 80px; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; resize: none; box-sizing: border-box; margin-bottom: 16px;"></textarea>
 
+      <label style="font-weight: bold; display: block; margin-bottom: 4px;">Photo (Optional)</label>
+      <input type="file" id="report-photo" accept="image/*" style="width: 100%; font-size: 16px; margin-bottom: 16px;">
+
       <!-- Submit Button -->
       <button id="submit-report" style="
         width: 100%; height: 56px; background: ${COLORS.darkBlue}; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
@@ -223,6 +227,8 @@ function showForm() {
     };
 
     try {
+      const photo = document.getElementById('report-photo').files[0];
+      if (photo) payload.photo = await shrinkPhoto(photo);
       await createReport(payload);
       closeReportSheet();
       loadReports();

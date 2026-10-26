@@ -19,6 +19,7 @@ export function openDetailSheet(report) {
       <p><b>${report.passable ? 'One lane open' : 'Blocked'}</b></p>
       <p id="detail-street"></p>
       <p>Reported ${timeAgo(report.created_at)}</p>
+      ${report.photo_key ? `<a href="/api/photos/${report.photo_key}" target="_blank"><img src="/api/photos/${report.photo_key}" alt="Photo"></a>` : ''}
       <p id="detail-note"></p>
       <p>${report.still_there_count} still there · ${report.cleared_count} cleared</p>
       <p id="detail-error"></p>

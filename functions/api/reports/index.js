@@ -1,7 +1,7 @@
 // functions/api/reports/index.js
 import { json, error } from '../../../lib/respond.js';
-import { listActive, insertReport } from '../../../lib/reports-db.js';
-import { TYPES, EXPIRY_HOURS, NOTE_MAX } from '../../../lib/rules.js';
+import { listActive, insertReport, insertPhoto } from '../../../lib/reports-db.js';
+import { TYPES, EXPIRY_HOURS, NOTE_MAX, PHOTO_MAX_BYTES } from '../../../lib/rules.js';
 
 export async function onRequestGet(context) {
     const url = new URL(context.request.url);
@@ -74,6 +74,20 @@ export async function onRequestPost(context) {
         return error('Other text is required when type is other', 400);
     }
 
+    let photoBytes = null;
+    if (body.photo) {
+        try {
+            const text = atob(body.photo);
+            photoBytes = new Uint8Array(text.length);
+            for (let i = 0; i < text.length; i++) photoBytes[i] = text.charCodeAt(i);
+        } catch (e) {
+            return error('Invalid photo', 400);
+        }
+        if (photoBytes.length > PHOTO_MAX_BYTES) {
+            return error('Photo is too big', 400);
+        }
+    }
+
     const id = crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
     const expiresAt = now + (EXPIRY_HOURS[type] || 48) * 3600;
@@ -92,7 +106,7 @@ export async function onRequestPost(context) {
         otherText: other_text || null,
         passable,
         onSite: 0,
-        photoKey: null,
+        photoKey: photoBytes ? `${id}.jpg` : null,
         note: note || null,
         status: 'active',
         createdAt: now,
@@ -101,6 +115,7 @@ export async function onRequestPost(context) {
 
     try {
         await insertReport(context.env.DB, report);
+        if (photoBytes) await insertPhoto(context.env.DB, report.photoKey, id, photoBytes, now);
         return json({ success: true, id });
     } catch (err) {
         console.error('Insert error:', err);

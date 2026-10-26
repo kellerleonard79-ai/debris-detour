@@ -119,8 +119,7 @@ button, input, textarea, .leaflet-container {
   border: 3px solid;
   border-radius: 50%;
   background: #fff;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
 }
 .marker.impassable { border-color: var(--red); }
 .marker.passable { border-color: var(--dark-yellow); }
@@ -190,6 +189,7 @@ button, input, textarea, .leaflet-container {
   cursor: pointer;
 }
 #sheet .panel p { margin: 8px 0; font-size: 18px; }
+#sheet .panel img { display: block; width: 100%; max-height: 140px; object-fit: cover; border-radius: 12px; margin-top: 8px; }
 #sheet .panel .verified { color: var(--dark-blue); font-weight: bold; }
 #sheet .panel #detail-error { color: var(--red); }
 #sheet .vote-btn { width: 48%; height: 52px; margin-top: 8px; border: 2px solid var(--dark-blue); border-radius: 12px; background: white; color: var(--dark-blue); font-size: 18px; font-weight: bold; cursor: pointer; }

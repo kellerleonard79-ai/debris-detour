@@ -5,7 +5,7 @@ import { COLORS } from './constants.js';
 
 export let map;
 const reportLayer = L.layerGroup();
-const LETTERS = { tree: 'T', flood: 'F', power_line: 'P', debris: 'D', other: '?' };
+const ICONS = { tree: '🌳', flood: '🌊', power_line: '⚡', debris: '🪨', other: '⚠️' };
 
 export function initMap() {
   map = L.map('map', { zoomControl: false }).setView([30.4213, -87.2169], 12); // Pensacola
@@ -32,7 +32,7 @@ export async function loadReports() {
     for (const r of reports) {
       const icon = L.divIcon({
         className: 'marker ' + (r.passable ? 'passable' : 'impassable'),
-        html: LETTERS[r.type],
+        html: ICONS[r.type],
         iconSize: [32, 32]
       });
       const color = r.passable ? COLORS.darkYellow : COLORS.red;
