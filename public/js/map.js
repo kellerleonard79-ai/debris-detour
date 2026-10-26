@@ -15,7 +15,6 @@ export function initMap() {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  map.locate({ setView: true, maxZoom: 16 });
   map.on('locationfound', e => L.circleMarker(e.latlng, { radius: 8, color: COLORS.darkBlue, fillOpacity: 1 }).addTo(map));
 
   reportLayer.addTo(map);

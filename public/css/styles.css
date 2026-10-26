@@ -173,6 +173,35 @@ button, input, textarea, .leaflet-container {
 
 #submit-report:disabled { opacity: 0.4; }
 
+#location-banner {
+  position: fixed;
+  top: 80px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  font-size: 16px;
+  z-index: 1005;
+}
+#location-banner[hidden] { display: none; }
+#location-banner button {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 22px;
+  background: var(--dark-blue);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 #settings-btn {
   position: fixed;
   bottom: 35px;

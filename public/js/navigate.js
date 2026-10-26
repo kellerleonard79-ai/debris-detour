@@ -4,6 +4,7 @@ import { geocode, getRoute, getReports } from './api.js';
 import { buildZones } from './avoid.js';
 import { getSettings } from './settings.js';
 import { COLORS } from './constants.js';
+import { showLocationBanner } from './location.js';
 
 const search = document.getElementById('search');
 const results = document.getElementById('results');
@@ -47,7 +48,8 @@ function pickPlace(place) {
 
   navigator.geolocation.getCurrentPosition(
     pos => drawRoute({ lat: pos.coords.latitude, lng: pos.coords.longitude }, place),
-    () => drawRoute(map.getCenter(), place)
+    () => showLocationBanner('Turn on location to get directions from where you are.', () => pickPlace(place)),
+    { timeout: 10000, maximumAge: 30000 }
   );
 }
 
