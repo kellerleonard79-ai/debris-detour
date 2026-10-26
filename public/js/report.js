@@ -5,6 +5,13 @@ import { loadReports } from './map.js';
 import { TYPES, NOTE_MAX, COLORS } from './constants.js';
 import { snapPoint } from './snap.js';
 
+const pinIcon = L.divIcon({
+  className: '',
+  html: `<svg width="36" height="48" viewBox="0 0 24 32"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z" fill="${COLORS.red}"/><circle cx="12" cy="12" r="4.5" fill="white"/></svg>`,
+  iconSize: [36, 48],
+  iconAnchor: [18, 48]
+});
+
 let reportMarker = null;
 let sectionLine = null;
 let currentSnap = null;
@@ -18,7 +25,7 @@ export function openReportSheet() {
   if (reportMarker) {
     map.removeLayer(reportMarker);
   }
-  reportMarker = L.marker([center.lat, center.lng], { draggable: true }).addTo(map);
+  reportMarker = L.marker([center.lat, center.lng], { icon: pinIcon, draggable: true }).addTo(map);
   reportMarker.on('dragend', snapPin);
 
   currentSnap = null;
