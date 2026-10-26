@@ -15,7 +15,7 @@ export function openDetailSheet(report) {
   sheet.innerHTML = `
     <div class="panel">
       <h2><span id="detail-type"></span> <button id="close-detail">✕</button></h2>
-      ${report.verified ? '<p class="verified">✔ Verified</p>' : ''}
+      ${report.verified ? '<p class="verified">✔ Verified</p>' : '<p>Unconfirmed</p>'}
       <p><b>${report.passable ? 'One lane open' : 'Blocked'}</b></p>
       <p id="detail-street"></p>
       <p>Reported ${timeAgo(report.created_at)}</p>
