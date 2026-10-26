@@ -3,6 +3,7 @@ import { map } from './map.js';
 import { geocode, getRoute, getReports } from './api.js';
 import { buildZones } from './avoid.js';
 import { getSettings } from './settings.js';
+import { COLORS } from './constants.js';
 
 const search = document.getElementById('search');
 const results = document.getElementById('results');
@@ -65,7 +66,7 @@ async function loadZones(start, end) {
 function showRoute(route) {
   if (routeLine) routeLine.remove();
   routeGeometry = route.geometry;
-  routeLine = L.geoJSON(route.geometry, { style: { weight: 7 } }).addTo(map);
+  routeLine = L.geoJSON(route.geometry, { style: { color: COLORS.lightBlue, weight: 7 } }).addTo(map);
 }
 
 async function drawRoute(start, end) {
@@ -98,7 +99,7 @@ function startNavigation() {
 
   watchId = navigator.geolocation.watchPosition(pos => {
     spot = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    if (!carMarker) carMarker = L.circleMarker(spot, { radius: 10, color: '#1976d2', fillOpacity: 1 }).addTo(map);
+    if (!carMarker) carMarker = L.circleMarker(spot, { radius: 10, color: COLORS.darkBlue, fillOpacity: 1 }).addTo(map);
     carMarker.setLatLng(spot);
     map.setView(spot, 17);
 

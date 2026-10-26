@@ -2,7 +2,7 @@
 import { map } from './map.js';
 import { createReport } from './api.js';
 import { loadReports } from './map.js';
-import { TYPES, NOTE_MAX } from './constants.js';
+import { TYPES, NOTE_MAX, COLORS } from './constants.js';
 import { snapPoint } from './snap.js';
 
 let reportMarker = null;
@@ -31,14 +31,14 @@ function showLocationStep() {
   reportMarker.dragging.enable();
 
   sheet.innerHTML = `
-    <div style="font-family: sans-serif; padding-bottom: 8px;">
+    <div style="padding-bottom: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <h2 style="margin: 0; font-size: 20px;">Report Obstruction</h2>
         <button id="close-sheet" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
       </div>
-      <p style="font-size: 14px; color: #666; margin: 0 0 8px;">Drag the pin on the map to the exact location.</p>
+      <p style="font-size: 14px; color: #666; margin: 0 0 8px;">Drag the pin precisely onto a street and it will snap to the nearest road.</p>
       <p id="street-label" style="font-weight: bold; margin: 0 0 12px;"></p>
-      <button id="confirm-location" disabled style="width: 100%; height: 52px; background: #007aff; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;">Confirm location</button>
+      <button id="confirm-location" disabled style="width: 100%; height: 52px; background: ${COLORS.darkBlue}; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;">Confirm location</button>
     </div>
   `;
   sheet.classList.add('open');
@@ -71,8 +71,8 @@ async function snapPin() {
     currentSnap = snap;
     confirm.disabled = false;
     sectionLine = L.geoJSON(snap.geometry, {
-      style: { color: 'orange', weight: 8 },
-      pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color: 'orange' })
+      style: { color: COLORS.lightYellow, weight: 8 },
+      pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color: COLORS.lightYellow })
     }).addTo(map);
   } catch (err) {
     label.textContent = 'Could not find the street. Drag the pin to try again.';
@@ -84,14 +84,14 @@ function showForm() {
   reportMarker.dragging.disable();
 
   sheet.innerHTML = `
-    <div style="font-family: sans-serif; padding-bottom: 20px;">
+    <div style="padding-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <h2 style="margin: 0; font-size: 20px;">Report Obstruction</h2>
         <button id="close-sheet" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
       </div>
 
       <p id="street-label" style="font-weight: bold; margin: 0 0 4px;"></p>
-      <button type="button" id="change-location" style="background: none; border: none; color: #007aff; font-size: 14px; padding: 0; margin-bottom: 16px; cursor: pointer;">Change location</button>
+      <button type="button" id="change-location" style="background: none; border: none; color: ${COLORS.darkBlue}; font-size: 14px; padding: 0; margin-bottom: 16px; cursor: pointer;">Change location</button>
 
       <!-- Hazard Type Selection -->
       <label style="font-weight: bold; display: block; margin-bottom: 8px;">Hazard Type</label>
@@ -119,10 +119,10 @@ function showForm() {
       <label style="font-weight: bold; display: block; margin-bottom: 8px;">Passability</label>
       <div style="display: flex; gap: 12px; margin-bottom: 16px;">
         <button type="button" class="pass-btn" data-passable="0" style="
-          flex: 1; padding: 14px; border: 2px solid #ff3b30; border-radius: 8px; background: white; color: #ff3b30; font-weight: bold; font-size: 16px; cursor: pointer;
+          flex: 1; padding: 14px; border: 2px solid ${COLORS.red}; border-radius: 8px; background: white; color: ${COLORS.red}; font-weight: bold; font-size: 16px; cursor: pointer;
         ">Impassable</button>
         <button type="button" class="pass-btn" data-passable="1" style="
-          flex: 1; padding: 14px; border: 2px solid #ffcc00; border-radius: 8px; background: white; color: #b38600; font-weight: bold; font-size: 16px; cursor: pointer;
+          flex: 1; padding: 14px; border: 2px solid ${COLORS.darkYellow}; border-radius: 8px; background: white; color: #222; font-weight: bold; font-size: 16px; cursor: pointer;
         ">Passable with caution</button>
       </div>
 
@@ -132,7 +132,7 @@ function showForm() {
 
       <!-- Submit Button -->
       <button id="submit-report" style="
-        width: 100%; height: 56px; background: #007aff; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
+        width: 100%; height: 56px; background: ${COLORS.darkBlue}; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
       ">Submit Report</button>
     </div>
   `;
@@ -149,7 +149,7 @@ function showForm() {
   typeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       typeButtons.forEach(b => b.style.borderColor = '#ccc');
-      btn.style.borderColor = '#007aff';
+      btn.style.borderColor = COLORS.darkBlue;
       selectedType = btn.getAttribute('data-type');
 
       const otherContainer = document.getElementById('other-container');
@@ -167,8 +167,14 @@ function showForm() {
     btn.addEventListener('click', () => {
       passButtons.forEach(b => {
         b.style.background = 'white';
+        b.style.color = b.getAttribute('data-passable') === '0' ? COLORS.red : '#222';
       });
-      btn.style.background = btn.getAttribute('data-passable') === '0' ? '#ffebee' : '#fffde7';
+      if (btn.getAttribute('data-passable') === '0') {
+        btn.style.background = COLORS.red;
+        btn.style.color = 'white';
+      } else {
+        btn.style.background = COLORS.lightYellow;
+      }
       selectedPassable = parseInt(btn.getAttribute('data-passable'), 10);
     });
   });

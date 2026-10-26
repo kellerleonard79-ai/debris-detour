@@ -1,6 +1,7 @@
 // public/js/map.js
 import { getReports } from './api.js';
 import { openDetailSheet } from './detail.js';
+import { COLORS } from './constants.js';
 
 export let map;
 const reportLayer = L.layerGroup();
@@ -15,7 +16,7 @@ export function initMap() {
   }).addTo(map);
 
   map.locate({ setView: true, maxZoom: 16 });
-  map.on('locationfound', e => L.circleMarker(e.latlng, { radius: 8, fillOpacity: 1 }).addTo(map));
+  map.on('locationfound', e => L.circleMarker(e.latlng, { radius: 8, color: COLORS.darkBlue, fillOpacity: 1 }).addTo(map));
 
   reportLayer.addTo(map);
   map.on('moveend', loadReports);
@@ -34,7 +35,7 @@ export async function loadReports() {
         html: LETTERS[r.type],
         iconSize: [32, 32]
       });
-      const color = r.passable ? '#f9a825' : '#d32f2f';
+      const color = r.passable ? COLORS.darkYellow : COLORS.red;
       L.geoJSON(JSON.parse(r.geometry), {
         style: { color, weight: 8 },
         pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 14, color })

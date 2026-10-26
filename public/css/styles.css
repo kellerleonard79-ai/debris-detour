@@ -1,10 +1,22 @@
+:root {
+  --dark-blue: #1d52bc;
+  --light-blue: #3ca5e6;
+  --red: #df3941;
+  --light-yellow: #ffde00;
+  --dark-yellow: #f4ab19;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
+}
+
+button, input, textarea, .leaflet-container {
+  font-family: inherit;
 }
 
 /* Map fills the entire background */
@@ -24,8 +36,7 @@ html, body {
   left: 0;
   right: 0;
   height: 70px;
-  background: rgba(40, 40, 40, 0.85);
-  backdrop-filter: blur(8px);
+  background: white;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -34,12 +45,11 @@ html, body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 
-.brand-title {
-  color: white;
-  font-weight: bold;
-  font-size: 24px;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+.logo {
+  width: 90px;
+  height: 90px;
+  margin: -10px -14px;
+  flex-shrink: 0;
 }
 
 #search {
@@ -48,8 +58,13 @@ html, body {
   height: 48px;
   padding: 0 16px;
   border: none;
+  background: #eceff1;
   border-radius: 24px;
   font-size: 18px;
+}
+
+#search:focus {
+  outline: 2px solid var(--dark-blue);
 }
 
 /* Big Red Report Button fixed at bottom center */
@@ -60,14 +75,13 @@ html, body {
   transform: translateX(-50%);
   width: 220px;
   height: 56px;
-  background: #ff3b30;
+  background: var(--red);
   color: white;
   border: none;
   border-radius: 28px;
   font-size: 16px;
   font-weight: bold;
   z-index: 1000;
-  box-shadow: 0 6px 16px rgba(255, 59, 48, 0.4);
   cursor: pointer;
 }
 
@@ -105,10 +119,11 @@ html, body {
   border: 3px solid;
   border-radius: 50%;
   background: #fff;
-  font: bold 16px sans-serif;
+  font-size: 16px;
+  font-weight: 700;
 }
-.marker.impassable { border-color: #d32f2f; }
-.marker.passable { border-color: #f9a825; }
+.marker.impassable { border-color: var(--red); }
+.marker.passable { border-color: var(--dark-yellow); }
 
 /* Address suggestions */
 #results {
@@ -150,7 +165,8 @@ html, body {
   padding: 0 20px;
   border: none;
   border-radius: 24px;
-  background: #eee;
+  background: var(--dark-blue);
+  color: white;
   font-size: 18px;
   font-weight: bold;
   cursor: pointer;
@@ -167,17 +183,18 @@ html, body {
   border: none;
   border-radius: 50%;
   background: white;
+  color: var(--dark-blue);
   font-size: 28px;
   z-index: 1000;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   cursor: pointer;
 }
 #sheet .panel p { margin: 8px 0; font-size: 18px; }
-#sheet .panel .verified { color: #2e7d32; font-weight: bold; }
-#sheet .panel #detail-error { color: #d32f2f; }
-#sheet .vote-btn { width: 48%; height: 52px; margin-top: 8px; border: 2px solid #ccc; border-radius: 12px; background: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+#sheet .panel .verified { color: var(--dark-blue); font-weight: bold; }
+#sheet .panel #detail-error { color: var(--red); }
+#sheet .vote-btn { width: 48%; height: 52px; margin-top: 8px; border: 2px solid var(--dark-blue); border-radius: 12px; background: white; color: var(--dark-blue); font-size: 18px; font-weight: bold; cursor: pointer; }
 #sheet .panel h2 { display: flex; justify-content: space-between; margin: 0 0 8px; font-size: 20px; }
 #sheet .panel h2 button { background: none; border: none; font-size: 20px; cursor: pointer; }
 #sheet .panel h3 { margin: 16px 0 4px; font-size: 16px; }
 #sheet .panel label { display: block; padding: 10px 0; font-size: 18px; text-transform: capitalize; }
-#sheet .panel input[type=checkbox] { width: 22px; height: 22px; margin-right: 10px; vertical-align: middle; }
+#sheet .panel input[type=checkbox] { accent-color: var(--dark-blue); width: 22px; height: 22px; margin-right: 10px; vertical-align: middle; }
